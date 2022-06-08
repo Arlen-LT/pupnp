@@ -384,45 +384,45 @@ int http_RecvMessage(SOCKINFO *info,
 	}
 
 	while (1) {
-		/* Double the bet if needed */
-		/* We should have already exited the loop if the value was <= 0
-		 * so the cast is safe */
-		if ((size_t)num_read >= buf_len) {
-			free(buf);
-			buf_len = 2 * buf_len;
-			buf = malloc(buf_len);
-			if (!buf) {
-				ret = UPNP_E_OUTOF_MEMORY;
-				goto ExitFunction;
-			}
-		}
 		num_read = sock_read(info, buf, buf_len, timeout_secs);
-		if (num_read > 0) {
-			/* got data */
-			status = parser_append(parser, buf, (size_t)num_read);
-			switch (status) {
-			case PARSE_SUCCESS:
-				UpnpPrintf(UPNP_INFO,
-					HTTP,
-					__FILE__,
-					__LINE__,
-					"<<< (RECVD) "
-					"<<<\n%s\n-----------------\n",
-					parser->msg.msg.buf);
-				print_http_headers(&parser->msg);
-				if (g_maxContentLength > 0 &&
-					parser->content_length >
-						(unsigned int)
-							g_maxContentLength) {
-					*http_error_code =
-						HTTP_REQ_ENTITY_TOO_LARGE;
-					line = __LINE__;
-					ret = UPNP_E_OUTOF_BOUNDS;
-					goto ExitFunction;
-				}
-				line = __LINE__;
-				ret = 0;
-				goto ExitFunction;
+        if (num_read > 0) {
+            /* got data */
+            status = parser_append(parser, buf, (size_t)num_read);
+            switch (status) {
+            case PARSE_SUCCESS:
+                UpnpPrintf(UPNP_INFO,
+                    HTTP,
+                    __FILE__,
+                    __LINE__,
+                    "<<< (RECVD) "
+                    "<<<\n%s\n-----------------\n",
+                    parser->msg.msg.buf);
+                print_http_headers(&parser->msg);
+                if (g_maxContentLength > 0 &&
+                    parser->content_length >
+                    (unsigned int)
+                    g_maxContentLength) {
+                    *http_error_code =
+                        HTTP_REQ_ENTITY_TOO_LARGE;
+                    line = __LINE__;
+                    ret = UPNP_E_OUTOF_BOUNDS;
+                    goto ExitFunction;
+                }
+                line = __LINE__;
+                ret = 0;
+                goto ExitFunction;
+            case PARSE_INCOMPLETE:
+                if (buf_len < 16 * 1024 * 1024)
+                {
+                    free(buf);
+                    buf_len <<= 1;
+                    buf = malloc(buf_len);
+                    if (!buf) {
+                        ret = UPNP_E_OUTOF_MEMORY;
+                        goto ExitFunction;
+                    }
+                }
+                break;
 			case PARSE_FAILURE:
 			case PARSE_NO_MATCH:
 				*http_error_code = parser->http_error_code;
