@@ -3709,15 +3709,10 @@ int UpnpGetIfInfo(const char *IfName)
 			 * big changes (gIF_NAME to wchar string?).
 			 */
 			char tmpIfName[LINE_SIZE] = {0};
-			size_t *s = NULL;
-
-			wcstombs_s(s,
-				tmpIfName,
-				sizeof(tmpIfName),
-				adapts_item->FriendlyName,
-				sizeof(tmpIfName));
-			free(s);
-
+			WideCharToMultiByte(CP_UTF8, 0, adapts_item->FriendlyName, LINE_SIZE, tmpIfName, LINE_SIZE, NULL, NULL);
+			// wcstombs(tmpIfName,
+			// 	adapts_item->FriendlyName,
+			// 	sizeof(tmpIfName));
 			if (strncmp(gIF_NAME, tmpIfName, sizeof(gIF_NAME)) !=
 				0) {
 				/* This is not the interface we're looking for.
