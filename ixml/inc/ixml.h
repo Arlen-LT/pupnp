@@ -1314,6 +1314,20 @@ UPNP_EXPORT_SPEC IXML_NodeList *ixmlElement_getElementsByTagNameNS(
 	const DOMString localName);
 
 /*!
+ * \brief Returns the value of the first Child Node as a string.
+ *
+ * Note that this string is not a copy and modifying it will modify the value
+ * of the first Child Node. 
+ * 
+ * NEED NOT FREE
+ *
+ *  \return A DOMString of the first Child Node value.
+ */
+EXPORT_SPEC const DOMString ixmlElement_getFirstChildElementValue(
+	IXML_Element* parentElement,
+	const char* name);
+
+/*!
  * \brief Queries whether the \b Element has an attribute with the given name
  * or a default value.
  *

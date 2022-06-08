@@ -638,7 +638,29 @@ IXML_NodeList *ixmlElement_getElementsByTagNameNS(IXML_Element *element,
 	return nodeList;
 }
 
-int ixmlElement_hasAttribute(IXML_Element *element, const DOMString name)
+
+const DOMString ixmlElement_getFirstChildElementValue(IXML_Element* parentElement, const char* name)
+{
+    if (!parentElement || !name)
+        return NULL;
+
+    IXML_NodeList* nodeList = ixmlElement_getElementsByTagName(parentElement, name);
+    if (!nodeList) return NULL;
+
+    IXML_Node* element = ixmlNodeList_item(nodeList, 0);
+    ixmlNodeList_free(nodeList);
+    if (!element)   return NULL;
+
+    IXML_Node* node = ixmlNode_getFirstChild(element);
+    if (!node) return NULL;
+
+    return ixmlNode_getNodeValue(node);
+}
+
+
+int ixmlElement_hasAttribute(
+	IXML_Element *element,
+	const DOMString name)
 {
 	IXML_Node *attrNode = NULL;
 
