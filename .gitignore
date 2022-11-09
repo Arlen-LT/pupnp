@@ -51,6 +51,7 @@ modules.builtin
 !.gitignore
 !.github
 !.mailmap
+!.gitlab-ci.yml
 
 #
 # Generated include files
