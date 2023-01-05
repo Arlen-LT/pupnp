@@ -1323,7 +1323,7 @@ UPNP_EXPORT_SPEC IXML_NodeList *ixmlElement_getElementsByTagNameNS(
  *
  *  \return A DOMString of the first Child Node value.
  */
-EXPORT_SPEC const DOMString ixmlElement_getFirstChildElementValue(
+UPNP_EXPORT_SPEC const DOMString ixmlElement_getFirstChildElementValue(
 	IXML_Element* parentElement,
 	const char* name);
 
