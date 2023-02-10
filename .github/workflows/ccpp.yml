@@ -37,7 +37,7 @@ jobs:
           -S .
           -B build
           -DCMAKE_BUILD_TYPE=${{ matrix.conf }}
-          -DBUILD_TESTING=ON
+          -DUPNP_BUILD_TEST=ON
           -DDOWNLOAD_AND_BUILD_DEPS=ON
           -DUPNP_ENABLE_OPEN_SSL=ON
           -DCMAKE_C_FLAGS="-Wall -Wpedantic"
@@ -71,7 +71,7 @@ jobs:
           -S .
           -B build
           -DCMAKE_BUILD_TYPE=${{ matrix.conf }}
-          -DBUILD_TESTING=ON
+          -DUPNP_BUILD_TEST=ON
           -DDOWNLOAD_AND_BUILD_DEPS=ON
           -DCMAKE_INSTALL_PREFIX=${{ GITHUB.WORKSPACE }}/test-install
           ${{ env.cmake_extra_flags }}
@@ -126,7 +126,7 @@ jobs:
           -S .
           -B build
           -DCMAKE_BUILD_TYPE=${{ matrix.conf }}
-          -DBUILD_TESTING=ON
+          -DUPNP_BUILD_TEST=ON
           -DDOWNLOAD_AND_BUILD_DEPS=ON
           -DCMAKE_INSTALL_PREFIX=${{ GITHUB.WORKSPACE }}/test-install
           ${{ env.cmake_extra_flags }}
@@ -164,7 +164,7 @@ jobs:
         cmake
         -S .
         -B build
-        -DBUILD_TESTING=ON
+        -DUPNP_BUILD_TEST=ON
         -DCMAKE_BUILD_TYPE=${{ matrix.conf }}
         -DDOWNLOAD_AND_BUILD_DEPS=ON
         -DUPNP_ENABLE_OPEN_SSL=ON

@@ -1,4 +1,4 @@
-if (BUILD_TESTING)
+if (UPNP_BUILD_TEST)
 	add_subdirectory (test)
 endif()
 

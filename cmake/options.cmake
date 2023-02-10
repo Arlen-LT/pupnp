@@ -7,7 +7,7 @@ function (UPNP_deprecated_option old_name new_name description default)
 	option (${new_name} ${description} ${default})
 endfunction()
 
-option (BUILD_TESTING "Run Tests after compile" ON)
+option (UPNP_BUILD_TEST "Run Tests after compile" ON)
 UPNP_deprecated_option (scriptsupport  IXML_ENABLE_SCRIPT_SUPPORT "script support for IXML document tree, see ixml.h" ON)
 option (UPNP_BUILD_SHARED "Build shared libraries" ON)
 option (UPNP_BUILD_STATIC "Build static libraries" ON)
