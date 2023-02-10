@@ -304,6 +304,15 @@ if (NOT MSVC)
 		endif()
 	endif()
 else()
+	if (NOT DOWNLOAD_AND_BUILD_DEPS)
+		include(FetchContent)
+		FetchContent_Declare(
+				PTHREADS4W
+				GIT_REPOSITORY "https://github.com/Arlen-LT/pthreads4w.git"
+				GIT_TAG        b2dfe26811c635ca06f5cb3924c1a4bc4624662a
+				OVERRIDE_FIND_PACKAGE
+		)
+	endif()
 	find_package (PTHREADS4W CONFIG REQUIRED)
 endif()
 #
