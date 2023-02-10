@@ -102,7 +102,8 @@ The Portable SDK for UPnP&trade; Devices is distributed under the BSD (Berkeley 
 | -------------- | ---------- | ---------------------------------------- |
 | 1.18.0         | TBA ?      | [Portable UPnP SDK][Portable UPnP SDK]   |
 | 1.16.0         | aborted    | [Portable UPnP SDK][Portable UPnP SDK]   |
-| 1.14.15        | TBA        | [Portable UPnP SDK][Portable UPnP SDK]   |
+| 1.14.16        | TBA        | [Portable UPnP SDK][Portable UPnP SDK]   |
+| 1.14.15        | 2022-11-18 | [Portable UPnP SDK][Portable UPnP SDK]   |
 | 1.14.14        | 2022-10-05 | [Portable UPnP SDK][Portable UPnP SDK]   |
 | 1.14.13        | 2022-08-03 | [Portable UPnP SDK][Portable UPnP SDK]   |
 | 1.14.12        | 2021-09-26 | [Portable UPnP SDK][Portable UPnP SDK]   |
@@ -385,23 +386,7 @@ can be called as described above.
 
 ### 10.6. Windows Build
 
-In order to build libupnp under Windows the pthreads-w32 package is required. You can download a self-extracting ZIP file from the following location:
-
-<ftp://sources.redhat.com/pub/pthreads-win32/pthreads-w32-2-7-0-release.exe>
-
-or possibly newer versions if available.
-
-- Execute the self-extracting archive and copy the Pre-build.2 folder to the top level source folder.
-- Rename Pre-build.2 to pthreads.
-- Open the provided workspace build\libupnp.dsw with Visual C++ 6.0 and select Build->Build libupnp.dll (F7)
-- In the build directory there are also VC8, VC9 and VC10 folders containing solution files for Visual Studio 2005/2008/2010 respectively.
-
-If you use newer versions to build libupnp, eg Visual Studio 2003 or later, then you need to rebuild the pthreads package so it uses the same VC runtime as libupnp to prevent cross boundary runtime problems (see <http://msdn.microsoft.com/en-us/library/ms235460%28v=VS.100%29.aspx>). Just replace the files in the Pre-build.2 folder (renamed to pthreads as mentioned above) with the newly build versions. If you also use a newer version of pthreads-win32 then you should also replace the header files in that directory structure (obviously).
-
-For building a static library instead of a DLL and for using the static pthreads-w32 library following switches need to be defined additionally:
-
-UPNP_STATIC_LIB - for creating a statically linkable UPnP-library
-PTW32_STATIC_LIB - for using the static pthreads32 library
+See the section `CMake Build`
 
 ### 10.7. CMake Build
 
