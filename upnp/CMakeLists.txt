@@ -208,7 +208,7 @@ if (UPNP_BUILD_STATIC)
 		PRIVATE $<$<PLATFORM_ID:Windows>:ws2_32>
 		PRIVATE $<$<PLATFORM_ID:Windows>:iphlpapi>
 		PUBLIC ixml_static
-		PUBLIC Threads::Static
+		PUBLIC $<IF:$<PLATFORM_ID:Windows>, PThreads4W::PThreads4W, Threads::Static>
 	)
 
 	install (TARGETS upnp_static

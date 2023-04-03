@@ -32,7 +32,7 @@ Overview
 include (CMakeDependentOption)
 
 Find_Package (Git)
-cmake_dependent_option (DOWNLOAD_AND_BUILD_DEPS "Get all missing stuff" ON ${Git_FOUND} OFF)
+cmake_dependent_option (DOWNLOAD_AND_BUILD_DEPS "Get all missing stuff" OFF ${Git_FOUND} OFF)
 
 if (DOWNLOAD_AND_BUILD_DEPS)
 	include (FetchContent)
