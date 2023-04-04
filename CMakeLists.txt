@@ -278,7 +278,16 @@ if (NOT MSVC)
 		endif()
 	endif()
 else()
-	find_package (PThreads4W REQUIRED)
+	if (NOT DOWNLOAD_AND_BUILD_DEPS)
+		include(FetchContent)
+		FetchContent_Declare(
+				PTHREADS4W
+				GIT_REPOSITORY "https://github.com/Arlen-LT/pthreads4w.git"
+				GIT_TAG        01aff35909c6fa342471589e74bb3331bdc93162
+				OVERRIDE_FIND_PACKAGE
+		)
+	endif()
+	find_package (PTHREADS4W CONFIG REQUIRED)
 endif()
 #
 # Determine if pthread_rwlock_t is available
