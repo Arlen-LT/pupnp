@@ -53,36 +53,16 @@
 
 extern ithread_mutex_t GlobalClientSubscribeMutex;
 
-typedef struct
-{
-	int handle;
-	int eventId;
-	void *Event;
-} job_arg;
-
-/*!
- * \brief Free memory associated with job's argument
- */
-static void free_subscribe_arg(job_arg *arg)
-{
-	if (arg) {
-		if (arg->Event) {
-			UpnpEventSubscribe_delete(arg->Event);
-		}
-		free(arg);
-	}
-}
-
 /*!
  * \brief This is a thread function to send the renewal just before the
  * subscription times out.
  */
 static void GenaAutoRenewSubscription(
-	/*! [in] Thread data(job_arg *) needed to send the renewal. */
+	/*! [in] Thread data(upnp_timeout *) needed to send the renewal. */
 	void *input)
 {
-	job_arg *arg = (job_arg *)input;
-	UpnpEventSubscribe *sub_struct = (UpnpEventSubscribe *)arg->Event;
+	upnp_timeout *event = (upnp_timeout *)input;
+	UpnpEventSubscribe *sub_struct = (UpnpEventSubscribe *)event->Event;
 	void *cookie;
 	Upnp_FunPtr callback_fun;
 	struct Handle_Info *handle_info;
@@ -104,7 +84,7 @@ static void GenaAutoRenewSubscription(
 		UpnpPrintf(
 			UPNP_INFO, GENA, __FILE__, __LINE__, "GENA AUTO RENEW");
 		timeout = UpnpEventSubscribe_get_TimeOut(sub_struct);
-		errCode = genaRenewSubscription(arg->handle,
+		errCode = genaRenewSubscription(event->handle,
 			UpnpEventSubscribe_get_SID(sub_struct),
 			&timeout);
 		UpnpEventSubscribe_set_ErrCode(sub_struct, errCode);
@@ -118,9 +98,9 @@ static void GenaAutoRenewSubscription(
 
 	if (send_callback) {
 		HandleReadLock();
-		if (GetHandleInfo(arg->handle, &handle_info) != HND_CLIENT) {
+		if (GetHandleInfo(event->handle, &handle_info) != HND_CLIENT) {
 			HandleUnlock();
-			free_subscribe_arg(arg);
+			free_upnp_timeout(event);
 			goto end_function;
 		}
 		UpnpPrintf(
@@ -130,10 +110,10 @@ static void GenaAutoRenewSubscription(
 		callback_fun = handle_info->Callback;
 		cookie = handle_info->Cookie;
 		HandleUnlock();
-		callback_fun(eventType, arg->Event, cookie);
+		callback_fun(eventType, event->Event, cookie);
 	}
 
-	free_subscribe_arg(arg);
+	free_upnp_timeout(event);
 
 end_function:
 	return;
@@ -153,8 +133,8 @@ static int ScheduleGenaAutoRenew(
 	/*! [in] Subscription being renewed. */
 	GenlibClientSubscription *sub)
 {
-	UpnpEventSubscribe *RenewEvent = NULL;
-	job_arg *arg = NULL;
+	UpnpEventSubscribe *RenewEventStruct = NULL;
+	upnp_timeout *RenewEvent = NULL;
 	int return_code = GENA_SUCCESS;
 	ThreadPoolJob job;
 
@@ -165,33 +145,34 @@ static int ScheduleGenaAutoRenew(
 		goto end_function;
 	}
 
-	RenewEvent = UpnpEventSubscribe_new();
-	if (RenewEvent == NULL) {
+	RenewEventStruct = UpnpEventSubscribe_new();
+	if (RenewEventStruct == NULL) {
 		return_code = UPNP_E_OUTOF_MEMORY;
 		goto end_function;
 	}
 
-	arg = (job_arg *)malloc(sizeof(job_arg));
-	if (arg == NULL) {
-		free(RenewEvent);
+	RenewEvent = (upnp_timeout *)malloc(sizeof(upnp_timeout));
+	if (RenewEvent == NULL) {
+		free(RenewEventStruct);
 		return_code = UPNP_E_OUTOF_MEMORY;
 		goto end_function;
 	}
-	memset(arg, 0, sizeof(job_arg));
+	memset(RenewEvent, 0, sizeof(upnp_timeout));
 
 	/* schedule expire event */
-	UpnpEventSubscribe_set_ErrCode(RenewEvent, UPNP_E_SUCCESS);
-	UpnpEventSubscribe_set_TimeOut(RenewEvent, TimeOut);
+	UpnpEventSubscribe_set_ErrCode(RenewEventStruct, UPNP_E_SUCCESS);
+	UpnpEventSubscribe_set_TimeOut(RenewEventStruct, TimeOut);
 	UpnpEventSubscribe_set_SID(
-		RenewEvent, GenlibClientSubscription_get_SID(sub));
+		RenewEventStruct, GenlibClientSubscription_get_SID(sub));
 	UpnpEventSubscribe_set_PublisherUrl(
-		RenewEvent, GenlibClientSubscription_get_EventURL(sub));
+		RenewEventStruct, GenlibClientSubscription_get_EventURL(sub));
 
-	arg->handle = client_handle;
-	arg->Event = RenewEvent;
+	/* RenewEvent->EventType=UPNP_EVENT_SUBSCRIPTION_EXPIRE; */
+	RenewEvent->handle = client_handle;
+	RenewEvent->Event = RenewEventStruct;
 
-	TPJobInit(&job, (start_routine)GenaAutoRenewSubscription, arg);
-	TPJobSetFreeFunction(&job, (free_routine)free_subscribe_arg);
+	TPJobInit(&job, (start_routine)GenaAutoRenewSubscription, RenewEvent);
+	TPJobSetFreeFunction(&job, (free_routine)free_upnp_timeout);
 	TPJobSetPriority(&job, MED_PRIORITY);
 
 	/* Schedule the job */
@@ -200,13 +181,14 @@ static int ScheduleGenaAutoRenew(
 		REL_SEC,
 		&job,
 		SHORT_TERM,
-		&(arg->eventId));
+		&(RenewEvent->eventId));
 	if (return_code != UPNP_E_SUCCESS) {
-		free_subscribe_arg(arg);
+		free(RenewEvent);
+		free(RenewEventStruct);
 		goto end_function;
 	}
 
-	GenlibClientSubscription_set_RenewEventId(sub, arg->eventId);
+	GenlibClientSubscription_set_RenewEventId(sub, RenewEvent->eventId);
 
 	return_code = GENA_SUCCESS;
 
@@ -683,7 +665,7 @@ int genaRenewSubscription(
 	if (TimerThreadRemove(&gTimerThread,
 		    GenlibClientSubscription_get_RenewEventId(sub),
 		    &tempJob) == 0) {
-		tempJob.free_func(tempJob.arg);
+		free_upnp_timeout((upnp_timeout *)tempJob.arg);
 	}
 
 	UpnpPrintf(UPNP_INFO,
