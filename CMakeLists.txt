@@ -278,16 +278,24 @@ if (NOT MSVC)
 		endif()
 	endif()
 else()
+	# find_package by vcpkg
 	if (NOT DOWNLOAD_AND_BUILD_DEPS)
-		include(FetchContent)
-		FetchContent_Declare(
-				PTHREADS4W
-				GIT_REPOSITORY "https://github.com/Arlen-LT/pthreads4w.git"
-				GIT_TAG        01aff35909c6fa342471589e74bb3331bdc93162
-				OVERRIDE_FIND_PACKAGE
-		)
+		find_package(PThreads4W REQUIRED)
+		if (PThreads4W_FOUND)
+			add_library (Threads::Threads ALIAS PThreads4W::PThreads4W)
+			add_library (Threads::Shared ALIAS PThreads4W::PThreads4W)
+			add_library (Threads::Static ALIAS PThreads4W::PThreads4W)
+		else ()
+			include(FetchContent)
+			FetchContent_Declare(
+					PTHREADS4W
+					GIT_REPOSITORY "https://github.com/Arlen-LT/pthreads4w.git"
+					GIT_TAG        01aff35909c6fa342471589e74bb3331bdc93162
+					OVERRIDE_FIND_PACKAGE
+			)
+			find_package (PTHREADS4W CONFIG REQUIRED)
+		endif()
 	endif()
-	find_package (PTHREADS4W CONFIG REQUIRED)
 endif()
 #
 # Determine if pthread_rwlock_t is available
