@@ -1,6 +1,6 @@
 function (UPNP_deprecated_option old_name new_name description default)
 	if (DEFINED ${old_name})
-		#message (DEPRECATION "${old_name} is a deprecated option and will be ignored after 1.14.x + 2. Use ${new_name} instead")
+		message (DEPRECATION "${old_name} is a deprecated option and will be ignored after 1.14.x + 2. Use ${new_name} instead")
 		set (default ${${old_name}})
 	endif()
 
